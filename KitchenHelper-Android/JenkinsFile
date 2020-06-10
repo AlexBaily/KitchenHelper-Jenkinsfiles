@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    environment {
+        GOPATH = "${WORKSPACE}"
+    }
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+                    sh 'cd KitchenHelper-Android'
+                    sh './gradlew check'
+                }
+            }
+        }
+        stage('UnitTest') {
+            steps {
+                script {
+                    sh './gradlew clean test'
+                }
+            }
+        }
+        stage('Build-APK') {
+            steps {
+                script {
+                    sh '/.gradlew assembleDebug assembleRelease'
+                } 
+            }
+        }
+    }
+}
