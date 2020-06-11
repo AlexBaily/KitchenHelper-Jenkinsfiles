@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     dir('KitchenHelper-Android') {
-                        sh 'chmod +x gradlw'
+                        sh 'chmod +x gradlew'
                         sh 'pwd'
                         sh './gradlew check'
                     }
