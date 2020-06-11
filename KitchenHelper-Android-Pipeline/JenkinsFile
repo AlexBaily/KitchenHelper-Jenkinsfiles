@@ -4,6 +4,7 @@ pipeline {
     stages {
         stage('Clone-Repo') {
             steps {
+                cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
                 }
@@ -11,7 +12,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                cleanWs()
+
                 script {
                     dir('KitchenHelper-Android') {
                         sh 'pwd'
