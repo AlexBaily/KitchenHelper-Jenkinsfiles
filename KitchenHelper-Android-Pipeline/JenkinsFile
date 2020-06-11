@@ -2,28 +2,40 @@ pipeline {
     agent any
 
     stages {
+        stage('Clone-Repo') {
+            steps {
+                script {
+                    sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+                }
+            }
+        }
         stage('Build') {
             steps {
                 cleanWs()
                 script {
-                    sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
-                    sh 'cd KitchenHelper-Android'
-                    sh 'pwd'
-                    sh './gradlew check'
+                    dir('KitchenHelper-Android') {
+                        sh 'pwd'
+                        sh './gradlew check'
+                    }
+
                 }
             }
         }
         stage('UnitTest') {
             steps {
                 script {
-                    sh './gradlew clean test'
+                    dir('KitchenHelper-Android') {
+                        sh './gradlew clean test'
+                    }
                 }
             }
         }
         stage('Build-APK') {
             steps {
                 script {
-                    sh '/.gradlew assembleDebug assembleRelease'
+                    dir('KitchenHelper-Android') {
+                        sh '/.gradlew assembleDebug assembleRelease'
+                    }
                 } 
             }
         }
