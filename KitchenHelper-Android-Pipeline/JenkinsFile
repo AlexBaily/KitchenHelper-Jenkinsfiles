@@ -1,12 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        GOPATH = "${WORKSPACE}"
-    }
     stages {
         stage('Build') {
             steps {
+                cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
                     sh 'cd KitchenHelper-Android'
