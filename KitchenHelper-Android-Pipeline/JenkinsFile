@@ -8,6 +8,7 @@ pipeline {
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
                     sh 'cd KitchenHelper-Android'
+                    sh 'pwd'
                     sh './gradlew check'
                 }
             }
