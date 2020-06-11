@@ -7,14 +7,15 @@ pipeline {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+
                 }
             }
         }
         stage('Build') {
             steps {
-
                 script {
                     dir('KitchenHelper-Android') {
+                        sh 'chmod +x gradlw'
                         sh 'pwd'
                         sh './gradlew check'
                     }
