@@ -41,5 +41,13 @@ pipeline {
                 } 
             }
         }
+        stage('Upload-APK')
+            steps {
+                script {
+                    dir ('KitchenHelper-Android/app/build/outputs/apk/release') {
+                        sh 'aws s3 cp app-release-unsigned.apk s3://kitchenhelper-android/release'
+                    }
+                }
+            }
     }
 }
