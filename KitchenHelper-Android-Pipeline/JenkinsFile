@@ -14,12 +14,13 @@ pipeline {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+                    sh 'git checkout apk_signing'
                     dir('KitchenHelper-Android') {
-                        echo "sed -e s/${env.RELEASE_FILE}/\${RELEASE_FILE} gradle.properties"
-                        sh "sed -e s/${env.RELEASE_FILE}/\${RELEASE_FILE} gradle.properties"
-                        sh "sed -e s/${env.RELEASE_STORE_PASS}/\${RELEASE_STORE_PASS} gradle.properties"
-                        sh "sed -e s/${env.RELEASE_ALIAS}/\${RELEASE_ALIAS} gradle.properties"
-                        sh "sed -e s/${env.RELEASE_PASS}/\${RELEASE_PASS} gradle.properties"
+                        echo "sed -e s/${env.RELEASE_FILE}/{RELEASE_FILE} gradle.properties"
+                        sh "sed -e s/${env.RELEASE_FILE}/{RELEASE_FILE} gradle.properties"
+                        sh "sed -e s/${env.RELEASE_STORE_PASS}/{RELEASE_STORE_PASS} gradle.properties"
+                        sh "sed -e s/${env.RELEASE_ALIAS}/{RELEASE_ALIAS} gradle.properties"
+                        sh "sed -e s/${env.RELEASE_PASS}/{RELEASE_PASS} gradle.properties"
                     }
                 }
             }
