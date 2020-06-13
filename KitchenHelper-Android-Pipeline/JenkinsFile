@@ -65,4 +65,9 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            sh 'twurl -d \'status=Oi, the build app build succeeded @ https://cdn.alexbaily.com/app-release.apk\' /1.1/statuses/update.json'
+        }
+    }
 }
