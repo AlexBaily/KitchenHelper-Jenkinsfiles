@@ -18,7 +18,7 @@ pipeline {
                         sh 'git checkout apk_signing'
                         echo "sed s@${env.RELEASE_FILE}@{RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s@{RELEASE_FILE}@${env.RELEASE_FILE}@ gradle.properties"
-                        sh "sed -i s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}// gradle.properties"
+                        sh "sed -i s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/ gradle.properties"
                         sh "sed -i s/{RELEASE_ALIAS}/${env.RELEASE_ALIAS}/ gradle.properties"
                         sh "sed -i s/{RELEASE_PASS}/${env.RELEASE_PASS}/ gradle.properties"
                     }
