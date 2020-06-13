@@ -58,7 +58,7 @@ pipeline {
         stage('Upload-APK') {
             steps {
                 script {
-                    dir ('KitchenHelper-Android/app/build/outputs/apk/release') {
+                    dir ('KitchenHelper-Android/app/build/outputs/apk/release.apk') {
                         sh 'aws s3 cp app-release.apk s3://kitchenhelper-android/release'
                     }
                 }
