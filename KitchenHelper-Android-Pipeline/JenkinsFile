@@ -1,13 +1,27 @@
 pipeline {
     agent any
 
+    environment {
+        RELEASE_FILE = credentials('jenkins-apk-release-file')
+        RELEASE_STORE_PASS = credentials('jenkins-apk-release-store-pass')
+        RELEASE_ALIAS = credentials('jenkins-apk-release-alias')
+        RELEASE_PASS = credentials('jenkins-apk-release-pass')
+    }
+
     stages {
         stage('Clone-Repo') {
             steps {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
-
+                    dir('KitchenHelper-Android') {
+                        sh 'git checkout apk_signing'
+                        echo "sed s@${env.RELEASE_FILE}@{RELEASE_FILE}@ gradle.properties"
+                        sh "sed -i s@{RELEASE_FILE}@${env.RELEASE_FILE}@ gradle.properties"
+                        sh "sed -i s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/ gradle.properties"
+                        sh "sed -i s/{RELEASE_ALIAS}/${env.RELEASE_ALIAS}/ gradle.properties"
+                        sh "sed -i s/{RELEASE_PASS}/${env.RELEASE_PASS}/ gradle.properties"
+                    }
                 }
             }
         }
@@ -41,13 +55,14 @@ pipeline {
                 } 
             }
         }
-        stage('Upload-APK')
+        stage('Upload-APK') {
             steps {
                 script {
                     dir ('KitchenHelper-Android/app/build/outputs/apk/release') {
-                        sh 'aws s3 cp app-release-unsigned.apk s3://kitchenhelper-android/release'
+                        sh 'aws s3 cp app-release.apk s3://kitchenhelper-android/release'
                     }
                 }
             }
+        }
     }
 }
