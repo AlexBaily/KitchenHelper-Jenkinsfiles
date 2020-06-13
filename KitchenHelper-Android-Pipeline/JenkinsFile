@@ -16,11 +16,11 @@ pipeline {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
                     dir('KitchenHelper-Android') {
                         sh 'git checkout apk_signing'
-                        echo "sed -e 's/{RELEASE_FILE}/${env.RELEASE_FILE}/' gradle.properties"
-                        sh "sed -e 's/{RELEASE_FILE}/${env.RELEASE_FILE}/' gradle.properties"
-                        sh "sed -e 's/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/' gradle.properties"
-                        sh "sed -e 's/{RELEASE_ALIAS}/${env.RELEASE_ALIAS}/' gradle.properties"
-                        sh "sed -e 's/{RELEASE_PASS}/${env.RELEASE_PASS}/' gradle.properties"
+                        echo "sed s/{RELEASE_FILE}/${env.RELEASE_FILE}/ gradle.properties"
+                        sh "sed s/{RELEASE_FILE}/${env.RELEASE_FILE}/ gradle.properties"
+                        sh "sed s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/ gradle.properties"
+                        sh "sed s/{RELEASE_ALIAS}/${env.RELEASE_ALIAS}/ gradle.properties"
+                        sh "sed s/{RELEASE_PASS}/${env.RELEASE_PASS}/ gradle.properties"
                     }
                 }
             }
