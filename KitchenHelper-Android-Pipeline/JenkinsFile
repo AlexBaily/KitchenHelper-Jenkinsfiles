@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+            string(name: 'Branch', defaultValue: 'master', description: 'Branch to checkout and build')
+    }
+
     environment {
         RELEASE_FILE = credentials('jenkins-apk-release-file')
         RELEASE_STORE_PASS = credentials('jenkins-apk-release-store-pass')
@@ -14,6 +18,7 @@ pipeline {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+                    sh 'get checkout ${params.Branch}'
                     dir('KitchenHelper-Android') {
                         echo "sed s@${env.RELEASE_FILE}@{RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s@{RELEASE_FILE}@${env.RELEASE_FILE}@ gradle.properties"
