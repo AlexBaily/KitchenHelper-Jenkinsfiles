@@ -18,8 +18,9 @@ pipeline {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
-                    sh "git checkout ${params.Branch}"
+                
                     dir('KitchenHelper-Android') {
+                        sh "git checkout ${params.Branch}"
                         echo "sed s@${env.RELEASE_FILE}@{RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s@{RELEASE_FILE}@${env.RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/ gradle.properties"
