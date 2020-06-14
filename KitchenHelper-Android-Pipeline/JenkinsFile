@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+            string(name: 'Branch', defaultValue: 'master', description: 'Branch to checkout and build')
+    }
+
     environment {
         RELEASE_FILE = credentials('jenkins-apk-release-file')
         RELEASE_STORE_PASS = credentials('jenkins-apk-release-store-pass')
@@ -14,7 +18,9 @@ pipeline {
                 cleanWs()
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-Android.git'
+                
                     dir('KitchenHelper-Android') {
+                        sh "git checkout ${params.Branch}"
                         echo "sed s@${env.RELEASE_FILE}@{RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s@{RELEASE_FILE}@${env.RELEASE_FILE}@ gradle.properties"
                         sh "sed -i s/{RELEASE_STORE_PASS}/${env.RELEASE_STORE_PASS}/ gradle.properties"
@@ -58,7 +64,7 @@ pipeline {
             steps {
                 script {
                     dir ('KitchenHelper-Android/app/build/outputs/apk/release') {
-                        sh 'aws s3 cp app-release.apk s3://kitchenhelper-android/kitchenhelper-release.apk'
+                        sh "aws s3 cp app-release.apk s3://kitchenhelper-android/kitchenhelper-release-${params.Branch}.apk"
                     }
                 }
             }
@@ -66,7 +72,7 @@ pipeline {
     }
     post {
         success {
-            sh '/usr/local/rvm/gems/ruby-2.4.1/wrappers/twurl -d \'status=Oi @AlexBaily, the latest APK build succeeded @ https://cdn.alexbaily.com/kitchenhelper-release.apk\' /1.1/statuses/update.json'
+            sh "/usr/local/rvm/gems/ruby-2.4.1/wrappers/twurl -d \'status=Oi @AlexBaily, the latest APK build for ${params.Branch} succeeded @ https://cdn.alexbaily.com/kitchenhelper-release-${params.Branch}.apk\' /1.1/statuses/update.json"
         }
     }
 }
