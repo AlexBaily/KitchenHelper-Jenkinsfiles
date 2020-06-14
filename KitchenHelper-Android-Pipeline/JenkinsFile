@@ -64,7 +64,7 @@ pipeline {
             steps {
                 script {
                     dir ('KitchenHelper-Android/app/build/outputs/apk/release') {
-                        sh 'aws s3 cp app-release.apk s3://kitchenhelper-android/kitchenhelper-release.apk'
+                        sh "aws s3 cp app-release.apk s3://kitchenhelper-android/kitchenhelper-release-${param.Branch}.apk"
                     }
                 }
             }
@@ -72,7 +72,7 @@ pipeline {
     }
     post {
         success {
-            sh '/usr/local/rvm/gems/ruby-2.4.1/wrappers/twurl -d \'status=Oi @AlexBaily, the latest APK build succeeded @ https://cdn.alexbaily.com/kitchenhelper-release.apk\' /1.1/statuses/update.json'
+            sh "/usr/local/rvm/gems/ruby-2.4.1/wrappers/twurl -d \'status=Oi @AlexBaily, the latest APK build for ${param.Branch} succeeded @ https://cdn.alexbaily.com/kitchenhelper-release-${param.Branch}.apk\' /1.1/statuses/update.json"
         }
     }
 }
