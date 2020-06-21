@@ -9,7 +9,7 @@ pipeline {
             steps {
                 script {
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'
-                    directory('KitchenHelper-backend') {
+                    dir('KitchenHelper-backend') {
                         sh 'mkdir -p $GOPATH/src/KitchenHelper-backend'
                         sh 'ln -sf $(pwd) $GOPATH/src/KitchenHelper-backend'
                         sh 'go get -d -v ./...'
