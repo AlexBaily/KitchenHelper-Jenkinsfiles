@@ -8,6 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    cleanWs()
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'
                     dir('KitchenHelper-backend') {
                         sh 'mkdir -p $GOPATH/src/KitchenHelper-backend'
