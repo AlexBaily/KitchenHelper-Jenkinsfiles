@@ -5,18 +5,11 @@ pipeline {
         GOPATH = "${WORKSPACE}"
     }
     stages {
-        stage('Build') {
+        stage('CloneRepo') {
             steps {
                 script {
                     cleanWs()
                     sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'
-                    dir('KitchenHelper-backend') {
-                        sh 'mkdir -p $GOPATH/src/KitchenHelper-backend'
-                        sh 'ln -sf $(pwd) $GOPATH/src/KitchenHelper-backend'
-                        sh 'go get -d -v ./...'
-                        sh 'go install -v ./...'
-                    }
-
                 }
             }
         }
