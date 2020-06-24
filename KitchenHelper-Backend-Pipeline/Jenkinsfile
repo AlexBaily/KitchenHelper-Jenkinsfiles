@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         GOPATH = "${WORKSPACE}"
+        ECR_REGISTRY_BACKEND = credentials('ecr-registry-backend')
     }
     stages {
         stage('CloneRepo') {
@@ -46,6 +47,7 @@ pipeline {
                         siteImage.inside {
                             sh 'echo "Inside the container"'
                         }
+                        docker.withRegistry("${ECR_REGISTRY_BACKEND}")
                         siteImage.push('latest')
                    }
                 } 
