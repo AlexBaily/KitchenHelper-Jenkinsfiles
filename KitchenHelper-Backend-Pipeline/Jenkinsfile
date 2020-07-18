@@ -3,33 +3,53 @@ pipeline {
 
     environment {
         GOPATH = "${WORKSPACE}"
+        ECR_REGISTRY_BACKEND = credentials('ecr-registry-backend')
     }
     stages {
-        stage('Build') {
+        stage('CloneRepo') {
             steps {
                 script {
-                    sh 'mkdir -p $GOPATH/src/KitchenHelper-backend'
-                    sh 'ln -sf $WORKSPACE $GOPATH/src/KitchenHelper-backend'
-                    sh 'go get -d -v ./...'
-                    sh 'go install -v ./...'
+                    cleanWs()
+                    sh 'mkdir \'./src\''
+                    sh 'mkdir \'./bin\''
+                    dir ('src'){
+                        sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'       
+                    }
+
+                }
+            }
+        }
+        stage ('BuildLocally') {
+            steps {
+                script {
+                    dir('src/KitchenHelper-backend') {
+                        sh 'echo $GOPATH'
+                        sh 'go get -d -v ./...'
+                        sh 'go install -v ./...'
+                    }
                 }
             }
         }
         stage('UnitTest') {
             steps {
                 script {
-                    sh 'go test'
+                   dir('src/KitchenHelper-backend') {
+                        sh 'go test ./...'
+                   }
                 }
             }
         }
         stage('Build-Image') {
             steps {
                 script {
-                    def siteImage = docker.build("kitchenhelper-backend:${env.BUILD_ID}")
-                    siteImage.inside {
-                        sh 'echo "Inside the container"'
-                    }
-                    siteImage.push('latest')
+                   dir('src/KitchenHelper-backend') {
+                        sh '$(aws ecr get-login --no-include-email --region eu-west-1)'
+                            def siteImage = docker.build("360577070949.dkr.ecr.eu-west-1.amazonaws.com/kitchenhelper-backend:${env.BUILD_ID}")
+                            siteImage.inside {
+                                sh 'echo "Inside the container"'
+                            }
+                            siteImage.push()
+                   }
                 } 
             }
         }
