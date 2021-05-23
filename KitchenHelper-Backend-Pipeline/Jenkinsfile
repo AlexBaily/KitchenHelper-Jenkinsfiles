@@ -1,55 +1,102 @@
 pipeline {
     agent any
+    
+      triggers {
+        GenericTrigger(
+         genericVariables: [
+          [key: 'action', value: '$.action'],
+          [key: 'pr_num', value: '$.number'],
+          [key: 'pr_url', value: '$.pull_request.html_url'],
+          [key: 'ref', value: '$.pull_request.head.ref'],
+          [key: 'sha', value: '$.pull_request.head.sha'],
+          [key: 'repo', value: '$.pull_request.head.repo.full_name']
+         ],
+    
+         causeString: 'Triggered on $ref',
+    
+         token: "$env.BACKEND_TOKEN",
+    
+         printContributedVariables: true,
+         printPostContent: true,
+    
+         silentResponse: false,
+    
+         regexpFilterText: '$action',
+         regexpFilterExpression: '(opened|synchronize|ready_for_review)'
+        )
+     }
+    
+      parameters {
+        string(name: 'BRANCH', defaultValue: 'master', description: 'Please enter your branch')
+        booleanParam(name: 'StartNode', defaultValue: true, description: 'Start the jenkins builder')
+      }
 
     environment {
         GOPATH = "${WORKSPACE}"
-        ECR_REGISTRY_BACKEND = credentials('ecr-registry-backend')
+        GOROOT = "/var/jenkins_home/go"
+        REFR = "$ref"
     }
     stages {
-        stage('CloneRepo') {
-            steps {
-                script {
-                    cleanWs()
-                    sh 'mkdir \'./src\''
-                    sh 'mkdir \'./bin\''
-                    dir ('src'){
-                        sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'       
-                    }
-
-                }
-            }
+        stage('Set GitHub status to pending and set branch') {
+          when { 
+              expression { env.action != null }
+           }
+          steps {
+              echo 'test'
+              sh "echo $env.action"
+              sh "echo $env.BRANCH"
+              sh "echo $env.REFR"
+              script {
+                env.BRANCH = env.action
+                env.access_token = sh(script: 'aws ssm get-parameter --name access_token --region eu-west-1 --with-decryption | jq .Parameter.Value', , returnStdout: true).trim()
+              }
+              sh "echo $env.repo"
+              sh "echo $env.access_token"
+              sh "echo $env.BRANCH"
+              sh "curl \"https://api.GitHub.com/repos/$env.repo/statuses/$env.sha?access_token=$env.access_token\" -H \"Content-Type: application/json\" -X POST -d \"{\\\"state\\\": \\\"pending\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"https://jenkins.alexbaily.com:8080/\\\"}\""
+          }
         }
-        stage ('BuildLocally') {
+        stage('Clone Repo') {
             steps {
                 script {
-                    dir('src/KitchenHelper-backend') {
-                        sh 'echo $GOPATH'
-                        sh 'go get -d -v ./...'
-                        sh 'go install -v ./...'
-                    }
+                    sh 'go clean -modcache' //https://github.com/golang/go/issues/27161
+                    sh 'rm -rf $WORKSPACE/*'
+                    sh "echo $env.BRANCH"
+                    sh 'mkdir -p $GOPATH/src/'
+                    sh 'git clone https://github.com/AlexBaily/KitchenHelper-backend.git'
+                    sh "cd $WORKSPACE/KitchenHelper-backend && git checkout ${BRANCH} && go get -d -v ./..."
                 }
             }
         }
         stage('UnitTest') {
             steps {
                 script {
-                   dir('src/KitchenHelper-backend') {
-                        sh 'go test ./...'
-                   }
+                    dir("$WORKSPACE/KitchenHelper-backend") {
+                        sh 'go test -v ./...'
+                    }
+                    dir("$WORKSPACE/KitchenHelper-backend/api") {
+                        sh 'go test -v ./...'
+                    }
                 }
             }
         }
+        stage('Build') {
+            steps {
+                dir("$WORKSPACE/KitchenHelper-backend") {
+                    script {
+                        sh "go build -v ./..."
+                    }
+                }
+            }
+        }/*
         stage('Build-Image') {
             steps {
                 script {
-                   dir('src/KitchenHelper-backend') {
-                        sh '$(aws ecr get-login --no-include-email --region eu-west-1)'
-                            def siteImage = docker.build("360577070949.dkr.ecr.eu-west-1.amazonaws.com/kitchenhelper-backend:${env.BUILD_ID}")
-                            siteImage.inside {
-                                sh 'echo "Inside the container"'
-                            }
-                            siteImage.push()
-                   }
+                    def siteImage = docker.build("kitchenhelper-backend:${env.BUILD_ID}")
+                    siteImage.inside {
+                        sh 'echo "Inside the container"'
+                    }
+                    siteImage.push('latest')
                 } 
             }
         }
@@ -70,6 +117,11 @@ pipeline {
                     '''
                 }
             }
-        }
+        }*/
+    }
+    post {
+        success {
+               sh "curl \"https://api.GitHub.com/repos/$env.repo/statuses/$env.sha?access_token=$env.access_token\" -H \"Content-Type: application/json\" -X POST -d \"{\\\"state\\\": \\\"success\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"https://jenkins.alexbaily.com:8080/\\\"}\""
+            }
     }
 }
